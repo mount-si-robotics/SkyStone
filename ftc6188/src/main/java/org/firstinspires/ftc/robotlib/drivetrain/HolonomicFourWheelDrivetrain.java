@@ -61,7 +61,7 @@ abstract public class HolonomicFourWheelDrivetrain extends Drivetrain implements
     // this is a multiplier since all mec wheels exert a certain amount of force on the robot being at an "angle"
     abstract double calculateWheelCoefficient(double course, double wheelAngle);
 
-    // returns the power for each wheel based on the wheel coefficient and multiplying that by the velocity with the rotation
+    // returns the power for each wheel based on the wheel coefficient and multiplying that by the VELOCITY with the rotation
     private double calculateWheelPower(double course, double velocity, double rotationPower, double wheelAngle)
     {
         return calculateWheelCoefficient(course, wheelAngle)*velocity+rotationPower;
@@ -117,7 +117,7 @@ abstract public class HolonomicFourWheelDrivetrain extends Drivetrain implements
         ElapsedTime timeoutTimer = new ElapsedTime();
         timeoutTimer.reset();
 
-        // do runs the inner code before checking against the while conditional this is needed since on first call velocity will be 0
+        // do runs the inner code before checking against the while conditional this is needed since on first call VELOCITY will be 0
         updateMotorPowers();
         do { updatePosition(); }
         while (isPositioning() && timeoutTimer.seconds() <= timeoutTime);

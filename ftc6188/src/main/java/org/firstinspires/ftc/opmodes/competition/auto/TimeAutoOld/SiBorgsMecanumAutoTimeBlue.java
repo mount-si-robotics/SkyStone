@@ -1,24 +1,23 @@
-package org.firstinspires.ftc.opmodes.competition.auto.FullAuto;
+package org.firstinspires.ftc.opmodes.competition.auto.TimeAutoOld;
 
 import android.graphics.Color;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotlib.robot.SiBorgsMecanumRobot;
 import org.firstinspires.ftc.robotlib.state.AutoDirection;
 import org.firstinspires.ftc.robotlib.state.Button;
 import org.firstinspires.ftc.robotlib.state.ServoState;
+import org.firstinspires.ftc.robotlib.state.ToggleBoolean;
 
 @Disabled
-@Autonomous(name="Auto Full V-AutoComp", group="AutoComp")
-public class SiBorgsMecanumAutoFull extends LinearOpMode
+@Autonomous(name="BLUE Comp Auto", group="CompAuto")
+public class SiBorgsMecanumAutoTimeBlue extends LinearOpMode
 {
     // Robot
     private SiBorgsMecanumRobot robot;
-    private ElapsedTime elapsedTime;
 
     // Fields
     private static final double VELOCITY = 0.5;
@@ -27,13 +26,16 @@ public class SiBorgsMecanumAutoFull extends LinearOpMode
     private Button capstoneOpen;
     private Button capstoneClose;
 
+    // End Behavior
+    private Button endToggle;
+    private ToggleBoolean parkFront;
+
     @Override
     public void runOpMode() throws InterruptedException
     {
         robot = new SiBorgsMecanumRobot(this.hardwareMap, this.telemetry);
         robot.changeBackgroundColor(Color.BLUE);
 
-        elapsedTime = new ElapsedTime();
         capstoneOpen = new Button();
         capstoneClose = new Button();
 
@@ -49,27 +51,53 @@ public class SiBorgsMecanumAutoFull extends LinearOpMode
             robot.armCrane.setVerticalPower(-gamepad1.left_stick_y);
             robot.armCrane.setHorizontalPower(gamepad1.right_stick_y);
 
+            updateEndToggle();
             telemetry.addData("ADD CAPSTONE TO SERVO (G1-DPAD) + (G1-LStick)", robot.armGripSlide.getState()); telemetry.update();
         }
         telemetry.addData("START OF AUTO PERIOD", ""); telemetry.update();
         /** Auto period now starts **/
 
-        /** Commands **/
-        // Plan: forward, grab platform, reverse, left to front of platform, front, right to push, left under bridge, forward
-        robot.drivetrain.autoPositionByEncoder(AutoDirection.FRONT, 29.5, VELOCITY);
-
+        /** AUTO COMMANDS **/
+        robot.drivetrain.autoPositionByTime(AutoDirection.RIGHT, 0.75, VELOCITY);
+        sleep(250);
+        robot.drivetrain.autoPositionByTime(AutoDirection.FRONT, 3.5, VELOCITY/2);
         robot.platformServo.setPosition(ServoState.DOWN);
-        robot.drivetrain.autoPositionByEncoder(AutoDirection.REAR, 29.5, VELOCITY);
+        sleep(500);
+        robot.drivetrain.autoPositionByTime(AutoDirection.REAR, 2, VELOCITY);
         robot.platformServo.setPosition(ServoState.UP);
+        sleep(500);
+        robot.drivetrain.autoPositionByTime(AutoDirection.LEFT, 1.75, VELOCITY);
+        robot.drivetrain.autoPositionByTime(AutoDirection.FRONT, 0.125, VELOCITY);
+        robot.drivetrain.autoPositionByTime(AutoDirection.LEFT, 0.3, VELOCITY);
+        sleep(250);
+        robot.drivetrain.autoPositionByTime(AutoDirection.FRONT, 0.6, VELOCITY);
+        sleep(250);
+        robot.drivetrain.autoPositionByTime(AutoDirection.RIGHT, 0.8, VELOCITY);
+        sleep(250);
 
-        robot.drivetrain.autoPositionByEncoder(AutoDirection.LEFT, 24, VELOCITY);
-        robot.drivetrain.autoPositionByEncoder(AutoDirection.FRONT, 22, VELOCITY);
-        robot.drivetrain.autoPositionByEncoder(AutoDirection.RIGHT, 10, VELOCITY);
-        robot.drivetrain.autoPositionByEncoder(AutoDirection.LEFT, 36, VELOCITY);
-        robot.drivetrain.autoPositionByEncoder(AutoDirection.FRONT, 9, VELOCITY);
-
-        // Pause then end the op mode safely
+        if (parkFront.output())
+        {
+            robot.drivetrain.autoPositionByTime(AutoDirection.FRONT, 0.35, VELOCITY);
+            sleep(250);
+            robot.drivetrain.autoPositionByTime(AutoDirection.LEFT, 1.9, VELOCITY);
+        }
+        else
+        {
+            robot.drivetrain.autoPositionByTime(AutoDirection.REAR, 0.7, VELOCITY);
+            sleep(250);
+            robot.drivetrain.autoPositionByTime(AutoDirection.LEFT, 2, VELOCITY);
+            sleep(250);
+            robot.drivetrain.autoPositionByTime(AutoDirection.REAR, 0.5, VELOCITY);
+        }
         sleep(1000);
         requestOpModeStop();
+    }
+
+    public void updateEndToggle()
+    {
+        if (endToggle.onPress())
+        { parkFront.toggle(); }
+
+        telemetry.addData("End motion: ", parkFront.output() ? "Inside" : "Outside");
     }
 }

@@ -4,7 +4,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 /*
-The encoder motor uses an encoder to determine the actual rotational velocity of the motor in encoder ticks per second and rotations per second
+The encoder motor uses an encoder to determine the actual rotational VELOCITY of the motor in encoder ticks per second and rotations per second
 The encoder motor is used in autonomous to provide a more accurate stopping point in the code as a regular motor often has problems reporting
 when it is in its "finished" state
  */
@@ -13,7 +13,7 @@ public class EncoderMotor extends ModifiedMotor
     // Timer
     private ElapsedTime elapsedTime;
 
-    // Storing values for velocity calculation
+    // Storing values for VELOCITY calculation
     private double lastEncoderCheck;
     private double newEncoderCheck;
 

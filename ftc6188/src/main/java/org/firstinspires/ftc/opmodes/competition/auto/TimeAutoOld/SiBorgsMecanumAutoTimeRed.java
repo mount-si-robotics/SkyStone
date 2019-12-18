@@ -1,8 +1,9 @@
-package org.firstinspires.ftc.opmodes.competition.auto.TimeAuto;
+package org.firstinspires.ftc.opmodes.competition.auto.TimeAutoOld;
 
 import android.graphics.Color;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.robotlib.robot.SiBorgsMecanumRobot;
@@ -11,8 +12,9 @@ import org.firstinspires.ftc.robotlib.state.Button;
 import org.firstinspires.ftc.robotlib.state.ServoState;
 import org.firstinspires.ftc.robotlib.state.ToggleBoolean;
 
-@Autonomous(name="BLUE Comp Auto", group="CompAuto")
-public class SiBorgsMecanumAutoTimeBlue extends LinearOpMode
+@Disabled
+@Autonomous(name="RED Comp Auto", group="CompAuto")
+public class SiBorgsMecanumAutoTimeRed extends LinearOpMode
 {
     // Robot
     private SiBorgsMecanumRobot robot;
@@ -32,7 +34,7 @@ public class SiBorgsMecanumAutoTimeBlue extends LinearOpMode
     public void runOpMode() throws InterruptedException
     {
         robot = new SiBorgsMecanumRobot(this.hardwareMap, this.telemetry);
-        robot.changeBackgroundColor(Color.BLUE);
+        robot.changeBackgroundColor(Color.RED);
 
         capstoneOpen = new Button();
         capstoneClose = new Button();
@@ -56,7 +58,7 @@ public class SiBorgsMecanumAutoTimeBlue extends LinearOpMode
         /** Auto period now starts **/
 
         /** AUTO COMMANDS **/
-        robot.drivetrain.autoPositionByTime(AutoDirection.RIGHT, 0.75, VELOCITY);
+        robot.drivetrain.autoPositionByTime(AutoDirection.LEFT, 0.75, VELOCITY);
         sleep(250);
         robot.drivetrain.autoPositionByTime(AutoDirection.FRONT, 3.5, VELOCITY/2);
         robot.platformServo.setPosition(ServoState.DOWN);
@@ -64,26 +66,26 @@ public class SiBorgsMecanumAutoTimeBlue extends LinearOpMode
         robot.drivetrain.autoPositionByTime(AutoDirection.REAR, 2, VELOCITY);
         robot.platformServo.setPosition(ServoState.UP);
         sleep(500);
-        robot.drivetrain.autoPositionByTime(AutoDirection.LEFT, 1.75, VELOCITY);
+        robot.drivetrain.autoPositionByTime(AutoDirection.RIGHT, 1.75, VELOCITY);
         robot.drivetrain.autoPositionByTime(AutoDirection.FRONT, 0.125, VELOCITY);
-        robot.drivetrain.autoPositionByTime(AutoDirection.LEFT, 0.3, VELOCITY);
+        robot.drivetrain.autoPositionByTime(AutoDirection.RIGHT, 0.3, VELOCITY);
         sleep(250);
         robot.drivetrain.autoPositionByTime(AutoDirection.FRONT, 0.6, VELOCITY);
         sleep(250);
-        robot.drivetrain.autoPositionByTime(AutoDirection.RIGHT, 0.8, VELOCITY);
+        robot.drivetrain.autoPositionByTime(AutoDirection.LEFT, 0.8, VELOCITY);
         sleep(250);
 
         if (parkFront.output())
         {
             robot.drivetrain.autoPositionByTime(AutoDirection.FRONT, 0.35, VELOCITY);
             sleep(250);
-            robot.drivetrain.autoPositionByTime(AutoDirection.LEFT, 1.9, VELOCITY);
+            robot.drivetrain.autoPositionByTime(AutoDirection.RIGHT, 1.9, VELOCITY);
         }
         else
         {
             robot.drivetrain.autoPositionByTime(AutoDirection.REAR, 0.7, VELOCITY);
             sleep(250);
-            robot.drivetrain.autoPositionByTime(AutoDirection.LEFT, 2, VELOCITY);
+            robot.drivetrain.autoPositionByTime(AutoDirection.RIGHT, 2, VELOCITY);
             sleep(250);
             robot.drivetrain.autoPositionByTime(AutoDirection.REAR, 0.5, VELOCITY);
         }
