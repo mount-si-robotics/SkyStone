@@ -9,7 +9,6 @@ import org.firstinspires.ftc.robotlib.state.AutoDirection;
 import org.firstinspires.ftc.robotlib.state.Button;
 import org.firstinspires.ftc.robotlib.state.ServoState;
 
-@Disabled
 @Autonomous(name="Park Auto", group="AutoComp")
 public class SiBorgsMecanumAutoPark extends LinearOpMode
 {

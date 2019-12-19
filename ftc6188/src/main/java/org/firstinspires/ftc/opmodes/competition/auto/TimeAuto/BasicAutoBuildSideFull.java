@@ -2,11 +2,13 @@ package org.firstinspires.ftc.opmodes.competition.auto.TimeAuto;
 
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.robotlib.auto.SiBorgsMecanumTimeAuto;
 import org.firstinspires.ftc.robotlib.state.AutoDirection;
 import org.firstinspires.ftc.robotlib.state.ServoState;
 
+@Disabled
 @Autonomous(name="Build Side | Platform + Bridge Park", group="CompAuto")
 public class BasicAutoBuildSideFull extends SiBorgsMecanumTimeAuto
 {
