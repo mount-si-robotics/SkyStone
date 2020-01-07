@@ -1,7 +1,6 @@
-package org.firstinspires.ftc.opmodes.competition.auto.ParkAuto;
+package org.firstinspires.ftc.opmodes.competition.autoFinal;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.robotlib.robot.SiBorgsMecanumRobot;

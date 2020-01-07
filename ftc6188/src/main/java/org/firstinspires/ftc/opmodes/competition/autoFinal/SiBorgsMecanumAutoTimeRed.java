@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.opmodes.competition.auto.TimeAuto;
+package org.firstinspires.ftc.opmodes.competition.autoFinal;
 
 import android.graphics.Color;
 
@@ -11,8 +11,8 @@ import org.firstinspires.ftc.robotlib.state.Button;
 import org.firstinspires.ftc.robotlib.state.ServoState;
 import org.firstinspires.ftc.robotlib.state.ToggleBoolean;
 
-@Autonomous(name="BLUE Comp Auto", group="CompAuto")
-public class SiBorgsMecanumAutoTimeBlue extends LinearOpMode
+@Autonomous(name="RED Comp Auto", group="CompAuto")
+public class SiBorgsMecanumAutoTimeRed extends LinearOpMode
 {
     // Robot
     private SiBorgsMecanumRobot robot;
@@ -32,10 +32,12 @@ public class SiBorgsMecanumAutoTimeBlue extends LinearOpMode
     public void runOpMode() throws InterruptedException
     {
         robot = new SiBorgsMecanumRobot(this.hardwareMap, this.telemetry);
-        robot.changeBackgroundColor(Color.BLUE);
+        robot.changeBackgroundColor(Color.RED);
 
         capstoneOpen = new Button();
         capstoneClose = new Button();
+        endToggle = new Button();
+        parkFront = new ToggleBoolean();
 
         /** Before the auto period starts the drivers should load a capstone into the arm **/
         while (!isStarted())
@@ -48,6 +50,8 @@ public class SiBorgsMecanumAutoTimeBlue extends LinearOpMode
 
             robot.armCrane.setVerticalPower(-gamepad1.left_stick_y);
             robot.armCrane.setHorizontalPower(gamepad1.right_stick_y);
+
+            endToggle.input(gamepad1.right_bumper || gamepad2.right_bumper);
 
             updateEndToggle();
             telemetry.addData("ADD CAPSTONE TO SERVO (G1-DPAD) + (G1-LStick)", robot.armGripSlide.getState()); telemetry.update();
