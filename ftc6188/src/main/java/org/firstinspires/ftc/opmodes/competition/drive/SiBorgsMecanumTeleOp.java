@@ -91,7 +91,8 @@ public class SiBorgsMecanumTeleOp extends OpMode
         // Drivetrain updates
         robot.drivetrain.setCourse(course);
         robot.drivetrain.setVelocity(velocity * (driverTwoBrakes.output() ? 0 : 1));
-        robot.drivetrain.setRotation((-gamepad1.left_stick_x * (3.0/4.0)) * (driverTwoBrakes.output() ? 0.5 : 1));
+        robot.drivetrain.setRotation((-gamepad1.left_stick_x * (3.0/4.0))
+                * (driverTwoBrakes.output() ? 0.5 : 1));
 
 
         /** DRIVER TWO **/
