@@ -27,19 +27,19 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.firstinspires.ftc.opmodes.auto;
+package org.firstinspires.ftc.opmodes.obsolete;
 
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotlib.autonomous.AutonomousRobot;
-import org.firstinspires.ftc.robotlib.information.OrientationInfo;
+import org.firstinspires.ftc.robotlib.navigation.Point;
 import org.firstinspires.ftc.robotlib.navigation.Point3D;
 import org.firstinspires.ftc.robotlib.state.Alliance;
-import org.firstinspires.ftc.robotlib.state.ServoState;
+import org.firstinspires.ftc.robotlib.state.Course;
 
-class BasicMecanumAutonomous {
+class MecanumAutonomous {
     private Alliance alliance;
     private Telemetry telemetry;
     private HardwareMap hardwareMap;
@@ -53,7 +53,7 @@ class BasicMecanumAutonomous {
      * @param telemetry FTC Logging
      * @param alliance Alliance to operate under
      */
-    BasicMecanumAutonomous(HardwareMap hardwareMap, Telemetry telemetry, Alliance alliance) {
+    MecanumAutonomous(HardwareMap hardwareMap, Telemetry telemetry, Alliance alliance) {
         this.hardwareMap = hardwareMap;
         this.telemetry = telemetry;
         this.alliance = alliance;
@@ -64,19 +64,19 @@ class BasicMecanumAutonomous {
      * Ran before the game starts
      */
     void init() {
-        telemetry.addData("Status", "Initialized");
+        /*telemetry.addData("Status", "Initialized");
         robot = new AutonomousRobot(this.hardwareMap, alliance, telemetry, elapsedTime);
-        robot.init();
+        robot.init();*/
     }
 
     /**
      * Ran after the game starts and before the game loop begins
      */
     void start() {
-        elapsedTime.reset();
+        /*elapsedTime.reset();
 
         // Enable Tracking
-        robot.trackables.activate();
+        robot.trackables.activate();*/
     }
 
     /**
@@ -84,7 +84,7 @@ class BasicMecanumAutonomous {
      */
     void end() {
         // Disable Tracking
-        robot.trackables.deactivate();
+        //robot.trackables.deactivate();
     }
 
     /**
@@ -92,46 +92,44 @@ class BasicMecanumAutonomous {
      * @return true - keep looping | false - stop looping
      */
     boolean loop() {
-        robot.move(0, 0.7, null, 20);
-        robot.move(robot.correctMovement(90), 0.5, null, 34);
-
-        for (int i = 0; i < 2; i++) {
-            robot.scanWait(2);
-
-            if (robot.isTrackableVisible() && robot.isSkystoneVisible()) {
-                // Get Skystone
-                Point3D positionFromSkystone = robot.getPositionFromSkystone();
-                Point3D stonePoint3D = new Point3D(robot.getTrackedSkystone().getLocation());
-                telemetry.addData("Position relative to Skystone", "{X, Y, Z} = %.0f, %.0f, %.0f", positionFromSkystone.x, positionFromSkystone.y, positionFromSkystone.z);
-                robot.move(robot.getCourse(positionFromSkystone, stonePoint3D), 0.3, null, robot.getDistance(positionFromSkystone, stonePoint3D) - 2);
-            } else robot.move(0, 0.5, null, 5);
-
-            // Intake Stone
-            robot.turn(180, 0.5);
-            robot.hardware.updateDeliveryStates(ServoState.FLOOR);
-            robot.hardware.blockGrabber.setPosition(ServoState.OPEN);
-            robot.wait(2.0);
-
-            robot.hardware.blockGrabber.setPosition(ServoState.CLOSED);
-            robot.wait(0.2);
-            robot.hardware.updateDeliveryStates(ServoState.CRADLE);
-            robot.wait(1.0);
-            robot.move(180, 0.5, null, 8);
-
-            // Deliver Stone
-            robot.move(robot.correctMovement(-90), 0.5, null, 71);
-            robot.move(0, 0.5, null, 14);
-            if (i == 0) robot.hardware.updateDeliveryStates(ServoState.ONEBLOCKDEPOSIT);
-            else robot.hardware.updateDeliveryStates(ServoState.TWOBLOCKDEPOSIT);
-            robot.hardware.blockGrabber.setPosition(ServoState.OPEN);
-            robot.wait(2.0);
-
-            // Move to the loading zone
-            robot.move(180, 0.5, null, 14);
-            robot.move(robot.correctMovement(90), 0.5, null, 94);
+        /*
+        // Backup so we can scan a trackable and get our initial location
+        robot.move(Course.FORWARD, 0.7, null, 10);
+        robot.scanWait(3);
+        if (!robot.isTrackableVisible() || !robot.isLocationKnown()) {
+            telemetry.addData("FAIL", "Failed to scan trackable. Time to give up");
+            telemetry.update();
+            return false;
         }
 
-        robot.move(robot.correctMovement(90), 0.5, null, 46);
+        // Scan for a block and retrieve it
+        robot.gotoLoadingZone();
+        robot.scanWait(3);
+        if (!robot.isTrackableVisible() || !robot.isSkystoneVisible()) {
+            telemetry.addData("FAIL", "Failed to scan Skystone. Time to give up");
+            telemetry.update();
+            return false;
+        }
+
+        // Until the timer has 5 seconds left, deliver stones
+        while (elapsedTime.seconds() < 25) {
+            robot.scanWait(1);
+            // Get Skystone
+            Point3D positionFromSkystone = robot.getPositionFromSkystone();
+            Point3D stonePoint3D = new Point3D(robot.getTrackedSkystone().getLocation());
+            telemetry.addData("Position relative to Skystone", "{X, Y, Z} = %.0f, %.0f, %.0f", positionFromSkystone.x, positionFromSkystone.y, positionFromSkystone.z);
+            robot.move(robot.getCourse(positionFromSkystone, stonePoint3D), 0.3, null, robot.getDistance(positionFromSkystone, stonePoint3D));
+            robot.hardware.intakeMotorManager.setMotorsVelocity(1.0);
+            robot.move(Course.FORWARD, 0.3, null, 3);
+            robot.hardware.intakeMotorManager.setMotorsVelocity(0.0);
+
+            // Move Skystone back to building zone
+            robot.moveToPoint(new Point(robot.buildingZone.getMiddleX(), robot.buildingZone.getMiddleY()), 0.5);
+
+            // TODO: This is where the servos should deliver the stone
+        }
+
+        robot.parkUnderBridge();*/
         return false;
     }
 }
