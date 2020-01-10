@@ -37,7 +37,7 @@ import org.firstinspires.ftc.robotlib.autonomous.AutonomousRobot;
 import org.firstinspires.ftc.robotlib.state.Alliance;
 import org.firstinspires.ftc.robotlib.state.Course;
 
-@Autonomous(name="Bridge Park Autonomous", group="auto")
+@Autonomous(name="Bridge Park Autonomous Blue", group="auto")
 public class BridgeParkAutonomous extends LinearOpMode {
     private Alliance alliance = Alliance.RED;
     private ElapsedTime elapsedTime = new ElapsedTime();
@@ -51,12 +51,12 @@ public class BridgeParkAutonomous extends LinearOpMode {
         robot = new AutonomousRobot(this.hardwareMap, alliance, telemetry, elapsedTime);
         robot.init();
 
+        elapsedTime.reset();
         // Wait for the game to start
         waitForStart();
-        elapsedTime.reset();
+        while (elapsedTime.seconds() < 20);
 
-        while (elapsedTime.seconds() < 25) {}
-        robot.simpleMove(Course.FORWARD, 0.7, 0, 1);
-        robot.simpleMove(Course.LEFT, 0.7, 0, 20);
+        robot.simpleMove(Course.BACKWARD, 0.7, 0, 1);
+        robot.simpleMove(Course.RIGHT, 0.7, 0, 20);
     }
 }

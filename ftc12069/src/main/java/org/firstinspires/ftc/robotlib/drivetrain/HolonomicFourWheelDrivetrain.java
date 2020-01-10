@@ -258,6 +258,11 @@ abstract public class HolonomicFourWheelDrivetrain extends Drivetrain implements
      * @param rearRight Rear Right Motor
      */
     void setMotorPowers(double frontLeft, double frontRight, double rearLeft, double rearRight) {
+        motorList[0].setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorList[1].setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorList[2].setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorList[3].setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
         motorPowers[0] = frontLeft;
         motorList[0].setPower(frontLeft);
         motorPowers[1] = frontRight;

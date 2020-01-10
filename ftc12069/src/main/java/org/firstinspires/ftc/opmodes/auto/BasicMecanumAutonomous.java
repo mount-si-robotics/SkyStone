@@ -39,6 +39,8 @@ import org.firstinspires.ftc.robotlib.state.Alliance;
 import org.firstinspires.ftc.robotlib.state.Course;
 import org.firstinspires.ftc.robotlib.state.ServoState;
 
+import static java.lang.Thread.sleep;
+
 class BasicMecanumAutonomous {
     private Alliance alliance;
     private Telemetry telemetry;
@@ -92,12 +94,21 @@ class BasicMecanumAutonomous {
      * @return true - keep looping | false - stop looping
      */
     boolean loop() {
+        robot.move(Course.BACKWARD, 0.2, null, 4);
+        robot.move(Course.RIGHT, 0.5, null, 75);
         robot.turn(90);
-        robot.move(Course.BACKWARD, 0.7, null, 10);
+        robot.turn(90);
+        robot.move(Course.FORWARD, 9.5, null, 45);
+        robot.hardware.platformServoLeft.setPosition(1.0);
+        robot.hardware.platformServoRight.setPosition(0.0);
+        robot.move(Course.BACKWARD, 0.5, null, 35);
+        robot.move(Course.RIGHT, 0.5, null, 35);
+
+        /*robot.move(Course.BACKWARD, 0.7, null, 10);
         robot.move(robot.correctMovement(Course.RIGHT), 0.5, null, 34);
 
-        for (int i = 0; i < 2; i++) {
-            if (i > 0) robot.turn(180);
+        for (int i = 0; i < 1; i++) {
+            //if (i > 0) robot.turn(180);
             
             robot.scanWait(2);
             if (robot.isTrackableVisible() && robot.isSkystoneVisible()) {
@@ -107,6 +118,8 @@ class BasicMecanumAutonomous {
                 telemetry.addData("Position relative to Skystone", "{X, Y, Z} = %.0f, %.0f, %.0f", positionFromSkystone.x, positionFromSkystone.y, positionFromSkystone.z);
                 robot.move(robot.getCourse(positionFromSkystone, stonePoint3D), 0.3, null, robot.getDistance(positionFromSkystone, stonePoint3D) - 2);
             } else robot.move(Course.BACKWARD, 0.5, null, 5);
+
+            robot.turn(90);
 
             // Intake Stone
             robot.turn(90);
@@ -133,7 +146,7 @@ class BasicMecanumAutonomous {
             robot.move(robot.correctMovement(Course.RIGHT), 0.5, null, 94);
         }
 
-        robot.move(robot.correctMovement(90), 0.5, null, 46);
+        //robot.move(robot.correctMovement(90), 0.5, null, 46);*/
         return false;
     }
 }
