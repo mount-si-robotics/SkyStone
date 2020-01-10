@@ -1,28 +1,21 @@
-package org.firstinspires.ftc.opmodes.teleop;
+package org.firstinspires.ftc.opmodes.testcode;
 
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotlib.robot.MecanumHardwareMap;
 import org.firstinspires.ftc.robotlib.state.Button;
 import org.firstinspires.ftc.robotlib.state.ServoState;
 
-import static org.firstinspires.ftc.robotlib.state.ServoState.CARRY;
-import static org.firstinspires.ftc.robotlib.state.ServoState.CRADLE;
-import static org.firstinspires.ftc.robotlib.state.ServoState.FLOOR;
-import static org.firstinspires.ftc.robotlib.state.ServoState.ONEBLOCKDEPOSIT;
-import static org.firstinspires.ftc.robotlib.state.ServoState.TWOBLOCKDEPOSIT;
-import static org.firstinspires.ftc.robotlib.state.ServoState.TWOBLOCKHOVER;
-
-@TeleOp(name="Mecanum TELEOP (12069)", group="Linear Opmode")
-public class MecanumTeleOp extends OpMode
-{
+@Autonomous(name="Arm Calib", group="Autonomous")
+public class ArmCalibration extends OpMode {
     private MecanumHardwareMap hardware;
     private ElapsedTime elapsedTime;
 
     // TeleOp States
     private boolean rightMotion = true;
+    private double servoPosition = 0.0;
 
     // Buttons
     private Button leftBumper;
@@ -95,8 +88,8 @@ public class MecanumTeleOp extends OpMode
         // Platform Servos
         if (xButton.isReleased()) {
             if (hardware.platformServoLeft.getPosition() == 0.0) {
-                    hardware.platformServoLeft.setPosition(1.0);
-                    hardware.platformServoRight.setPosition(0.0);
+                hardware.platformServoLeft.setPosition(1.0);
+                hardware.platformServoRight.setPosition(0.0);
             } else {
                 hardware.platformServoLeft.setPosition(0.0);
                 hardware.platformServoRight.setPosition(1.0);
@@ -112,11 +105,13 @@ public class MecanumTeleOp extends OpMode
 
         // GAMEPAD 2
         if (leftBumper.isReleased()) {
-            hardware.deliveryLeft.decrement();
-            hardware.deliveryRight.decrement();
+            servoPosition -= 0.01;
+            hardware.deliveryLeft.setPosition(servoPosition);
+            hardware.deliveryRight.setPosition(servoPosition);
         } else if (rightBumper.isReleased()) {
-            hardware.deliveryLeft.increment();
-            hardware.deliveryRight.increment();
+            servoPosition += 0.01;
+            hardware.deliveryLeft.setPosition(servoPosition);
+            hardware.deliveryRight.setPosition(servoPosition);
         }
 
         if (yButton.isReleased()) {
@@ -134,8 +129,8 @@ public class MecanumTeleOp extends OpMode
         telemetry.addData("Velocity", velocity);
         telemetry.addData("Rotation", rotation);
         telemetry.addData("Driving Mode", rightMotion ? "RIGHT" : "LEFT");
-        telemetry.addData("Left Delivery Servo State", hardware.deliveryLeft.getState().stringify());
-        telemetry.addData("Right Delivery Servo State", hardware.deliveryRight.getState().stringify());
+        telemetry.addData("Left Delivery Servo State", hardware.deliveryLeft.getPosition());
+        telemetry.addData("Right Delivery Servo State", hardware.deliveryRight.getPosition());
         telemetry.update();
     }
 

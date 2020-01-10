@@ -27,7 +27,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.firstinspires.ftc.opmodes.auto;
+package org.firstinspires.ftc.opmodes.obsolete;
 
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -37,6 +37,7 @@ import org.firstinspires.ftc.robotlib.autonomous.AutonomousRobot;
 import org.firstinspires.ftc.robotlib.navigation.Point;
 import org.firstinspires.ftc.robotlib.navigation.Point3D;
 import org.firstinspires.ftc.robotlib.state.Alliance;
+import org.firstinspires.ftc.robotlib.state.Course;
 
 class MecanumAutonomous {
     private Alliance alliance;
@@ -63,19 +64,19 @@ class MecanumAutonomous {
      * Ran before the game starts
      */
     void init() {
-        telemetry.addData("Status", "Initialized");
+        /*telemetry.addData("Status", "Initialized");
         robot = new AutonomousRobot(this.hardwareMap, alliance, telemetry, elapsedTime);
-        robot.init();
+        robot.init();*/
     }
 
     /**
      * Ran after the game starts and before the game loop begins
      */
     void start() {
-        elapsedTime.reset();
+        /*elapsedTime.reset();
 
         // Enable Tracking
-        robot.trackables.activate();
+        robot.trackables.activate();*/
     }
 
     /**
@@ -83,7 +84,7 @@ class MecanumAutonomous {
      */
     void end() {
         // Disable Tracking
-        robot.trackables.deactivate();
+        //robot.trackables.deactivate();
     }
 
     /**
@@ -91,8 +92,9 @@ class MecanumAutonomous {
      * @return true - keep looping | false - stop looping
      */
     boolean loop() {
+        /*
         // Backup so we can scan a trackable and get our initial location
-        robot.move(0, 0.7, null, 10);
+        robot.move(Course.FORWARD, 0.7, null, 10);
         robot.scanWait(3);
         if (!robot.isTrackableVisible() || !robot.isLocationKnown()) {
             telemetry.addData("FAIL", "Failed to scan trackable. Time to give up");
@@ -118,7 +120,7 @@ class MecanumAutonomous {
             telemetry.addData("Position relative to Skystone", "{X, Y, Z} = %.0f, %.0f, %.0f", positionFromSkystone.x, positionFromSkystone.y, positionFromSkystone.z);
             robot.move(robot.getCourse(positionFromSkystone, stonePoint3D), 0.3, null, robot.getDistance(positionFromSkystone, stonePoint3D));
             robot.hardware.intakeMotorManager.setMotorsVelocity(1.0);
-            robot.move(0, 0.3, null, 3);
+            robot.move(Course.FORWARD, 0.3, null, 3);
             robot.hardware.intakeMotorManager.setMotorsVelocity(0.0);
 
             // Move Skystone back to building zone
@@ -127,7 +129,7 @@ class MecanumAutonomous {
             // TODO: This is where the servos should deliver the stone
         }
 
-        robot.parkUnderBridge();
+        robot.parkUnderBridge();*/
         return false;
     }
 }

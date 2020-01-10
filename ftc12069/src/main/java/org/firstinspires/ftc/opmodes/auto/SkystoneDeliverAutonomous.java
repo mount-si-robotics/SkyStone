@@ -29,109 +29,65 @@
 
 package org.firstinspires.ftc.opmodes.auto;
 
-import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.util.ElapsedTime;
-
-import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.robotlib.autonomous.AutonomousRobot;
-import org.firstinspires.ftc.robotlib.information.OrientationInfo;
 import org.firstinspires.ftc.robotlib.navigation.Point3D;
-import org.firstinspires.ftc.robotlib.state.Alliance;
+import org.firstinspires.ftc.robotlib.state.Course;
 import org.firstinspires.ftc.robotlib.state.ServoState;
 
-class BasicMecanumAutonomous {
-    private Alliance alliance;
-    private Telemetry telemetry;
-    private HardwareMap hardwareMap;
-    private ElapsedTime elapsedTime = new ElapsedTime();
-
-    private AutonomousRobot robot;
-
-    /**
-     * Creates an autonomous mecanum robot
-     * @param hardwareMap FTC hardware map
-     * @param telemetry FTC Logging
-     * @param alliance Alliance to operate under
-     */
-    BasicMecanumAutonomous(HardwareMap hardwareMap, Telemetry telemetry, Alliance alliance) {
-        this.hardwareMap = hardwareMap;
-        this.telemetry = telemetry;
-        this.alliance = alliance;
-    }
-
-    /**
-     * Initializes the robot
-     * Ran before the game starts
-     */
-    void init() {
-        telemetry.addData("Status", "Initialized");
-        robot = new AutonomousRobot(this.hardwareMap, alliance, telemetry, elapsedTime);
-        robot.init();
-    }
-
-    /**
-     * Ran after the game starts and before the game loop begins
-     */
-    void start() {
-        elapsedTime.reset();
-
-        // Enable Tracking
+class SkystoneDeliverAutonomous extends AutonomousBase {
+    @Override
+    public void initializeOpmode() {
         robot.trackables.activate();
     }
 
-    /**
-     * Ran once the game has ended
-     */
-    void end() {
-        // Disable Tracking
-        robot.trackables.deactivate();
-    }
+    @Override
+    public void startOpmode() {
+        robot.move(Course.BACKWARD, 0.7, null, 10);
+        robot.move(robot.correctMovement(Course.RIGHT), 0.5, null, 34);
 
-    /**
-     * Game Loop Method (runs until stop is requested)
-     * @return true - keep looping | false - stop looping
-     */
-    boolean loop() {
-        robot.move(180, 0.7, null, 10);
-        robot.move(robot.correctMovement(90), 0.5, null, 34);
+        for (int i = 0; i < 1; i++) {
+            //if (i > 0) robot.turn(180);
 
-        for (int i = 0; i < 2; i++) {
             robot.scanWait(2);
-
             if (robot.isTrackableVisible() && robot.isSkystoneVisible()) {
                 // Get Skystone
                 Point3D positionFromSkystone = robot.getPositionFromSkystone();
                 Point3D stonePoint3D = new Point3D(robot.getTrackedSkystone().getLocation());
                 telemetry.addData("Position relative to Skystone", "{X, Y, Z} = %.0f, %.0f, %.0f", positionFromSkystone.x, positionFromSkystone.y, positionFromSkystone.z);
                 robot.move(robot.getCourse(positionFromSkystone, stonePoint3D), 0.3, null, robot.getDistance(positionFromSkystone, stonePoint3D) - 2);
-            } else robot.move(180, 0.5, null, 5);
+            } else robot.move(Course.BACKWARD, 0.5, null, 5);
+
+            robot.turn(90);
 
             // Intake Stone
-            robot.turn(180, 0.5);
+            robot.turn(90);
             robot.hardware.updateDeliveryStates(ServoState.FLOOR);
             robot.hardware.blockGrabber.setPosition(ServoState.OPEN);
             robot.wait(2.0);
 
             robot.hardware.blockGrabber.setPosition(ServoState.CLOSED);
             robot.wait(0.2);
-            robot.hardware.updateDeliveryStates(ServoState.CRADLE);
+            robot.hardware.updateDeliveryStates(ServoState.ONEBLOCKHOVER);
             robot.wait(1.0);
-            robot.move(180, 0.5, null, 8);
+            robot.move(Course.BACKWARD, 0.5, null, 8);
 
             // Deliver Stone
-            robot.move(robot.correctMovement(-90), 0.5, null, 71);
-            robot.move(0, 0.5, null, 14);
+            robot.move(robot.correctMovement(Course.LEFT), 0.5, null, 71);
+            robot.move(Course.FORWARD, 0.5, null, 14);
             if (i == 0) robot.hardware.updateDeliveryStates(ServoState.ONEBLOCKDEPOSIT);
             else robot.hardware.updateDeliveryStates(ServoState.TWOBLOCKDEPOSIT);
             robot.hardware.blockGrabber.setPosition(ServoState.OPEN);
             robot.wait(2.0);
 
             // Move to the loading zone
-            robot.move(180, 0.5, null, 14);
-            robot.move(robot.correctMovement(90), 0.5, null, 94);
+            robot.move(Course.BACKWARD, 0.5, null, 14);
+            robot.move(robot.correctMovement(Course.RIGHT), 0.5, null, 94);
         }
 
         robot.move(robot.correctMovement(90), 0.5, null, 46);
-        return false;
+    }
+
+    @Override
+    public void endOpmode() {
+        robot.trackables.deactivate();
     }
 }

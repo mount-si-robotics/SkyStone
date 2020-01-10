@@ -241,11 +241,44 @@ abstract public class HolonomicFourWheelDrivetrain extends Drivetrain implements
      * @return Array of wheel rotation velocities
      */
     public double[] getWheelRotationValues(double velocity) {
-        return new double[] {
-                velocity > 0 ? velocity : -velocity, // Front Left
-                velocity > 0 ? -velocity : velocity, // Front Right
-                velocity > 0 ? velocity : -velocity, // Rear Right
-                velocity > 0 ? -velocity : velocity // Rear Left
+        return new double[]{
+                velocity,
+                velocity,
+                velocity,
+                velocity
         };
+    }
+
+    /**
+     * Special method for manually setting motor velocities.
+     * Mainly for rotating.
+     * @param frontLeft Front Left Motor
+     * @param frontRight Front Right Motor
+     * @param rearLeft Rear Left Motor
+     * @param rearRight Rear Right Motor
+     */
+    void setMotorPowers(double frontLeft, double frontRight, double rearLeft, double rearRight) {
+        motorList[0].setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorList[1].setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorList[2].setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorList[3].setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        motorPowers[0] = frontLeft;
+        motorList[0].setPower(frontLeft);
+        motorPowers[1] = frontRight;
+        motorList[1].setPower(frontRight);
+        motorPowers[2] = rearLeft;
+        motorList[2].setPower(rearLeft);
+        motorPowers[3] = rearRight;
+        motorList[3].setPower(rearRight);
+    }
+
+    /**
+     * Special method for manually setting motor velocities.
+     * @param wheelPowers Array of motor powers (In order: front left, front right, rear right, rear left)
+     * @see #setMotorPowers(double, double, double, double)
+     */
+    void setMotorPowers(double[] wheelPowers) {
+        this.setMotorPowers(wheelPowers[0], wheelPowers[1], wheelPowers[2], wheelPowers[3]);
     }
 }
