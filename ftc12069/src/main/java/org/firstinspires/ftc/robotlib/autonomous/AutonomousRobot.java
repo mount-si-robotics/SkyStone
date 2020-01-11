@@ -128,7 +128,7 @@ public class AutonomousRobot {
          */
         int cameraMonitorViewId = hardware.internalHardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardware.internalHardwareMap.appContext.getPackageName());
         VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
-        parameters.cameraName = hardware.webcamName;
+        //parameters.cameraName = hardware.webcamName;
         // VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
 
         parameters.vuforiaLicenseKey = Constants.VUFORIA_KEY;
@@ -557,7 +557,8 @@ public class AutonomousRobot {
         hardware.drivetrain.setRotation(rotation);
         hardware.drivetrain.setVelocity(velocity);
         hardware.drivetrain.setTargetPosition(distance * hardware.motorTicksPerInch);
-        while (isOpmodeActive() && hardware.drivetrain.isPositioning()) hardware.drivetrain.updatePosition();
+        while (isOpmodeActive() && hardware.drivetrain.isPositioning(telemetry)) hardware.drivetrain.updatePosition();
+        telemetry.update();
         hardware.drivetrain.finishPositioning();
     }
 
