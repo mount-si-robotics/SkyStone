@@ -59,7 +59,7 @@ public class MecanumAutonomousTesting extends LinearOpMode {
         telemetry.addData("Status", "Initialized");
         alliance = Alliance.BLUE;
 
-        robot = new AutonomousRobot(this.hardwareMap, alliance, telemetry, elapsedTime);
+        robot = new AutonomousRobot(this.hardwareMap, alliance, this, elapsedTime);
         robot.init();
     }
 

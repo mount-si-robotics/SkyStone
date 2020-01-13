@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.robotlib.autonomous;
 
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -21,7 +22,7 @@ import org.firstinspires.ftc.robotlib.information.OrientationInfo;
 import org.firstinspires.ftc.robotlib.navigation.Area;
 import org.firstinspires.ftc.robotlib.navigation.Point;
 import org.firstinspires.ftc.robotlib.navigation.Point3D;
-import org.firstinspires.ftc.robotlib.robot.MecanumHardwareMap;
+import org.firstinspires.ftc.robotlib.robot.BasicOdometricalMecanumHardwareMap;
 import org.firstinspires.ftc.robotlib.state.Alliance;
 
 import java.util.ArrayList;
@@ -38,8 +39,9 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
  * Vuforia is handled internally, providing only important information.
  */
 public class AutonomousRobot {
-    public MecanumHardwareMap hardware;
+    public BasicOdometricalMecanumHardwareMap hardware;
     private Alliance alliance;
+    private LinearOpMode opmode;
     private Telemetry telemetry;
 
     private VuforiaLocalizer vuforia;
@@ -93,12 +95,13 @@ public class AutonomousRobot {
      * Creates an instance of an autonomous robot manager.
      * @param hwMap FTC hardware map
      * @param alliance Alliance Enum
-     * @param telemetry Logging
+     * @param opmode Current Running OpMode
      */
-    public AutonomousRobot(HardwareMap hwMap, Alliance alliance, Telemetry telemetry) {
-        this.hardware = new MecanumHardwareMap(hwMap);
+    public AutonomousRobot(HardwareMap hwMap, Alliance alliance, LinearOpMode opmode) {
+        this.hardware = new BasicOdometricalMecanumHardwareMap(hwMap);
         this.alliance = alliance;
-        this.telemetry = telemetry;
+        this.opmode = opmode;
+        this.telemetry = opmode.telemetry;
         this.elapsedTime = new ElapsedTime();
         this.locationInfo = new LocationInfo();
     }
@@ -106,16 +109,13 @@ public class AutonomousRobot {
     /**
      * Creates an instance of an autonomous robot manager.
      * @param hwMap FTC hardware map
-     * @param alliance Alliance Enum
-     * @param telemetry Logging
+     * @param alliance Current Alliance
+     * @param opmode Current Running OpMode
      * @param elapsedTime Game Timer
      */
-    public AutonomousRobot(HardwareMap hwMap, Alliance alliance, Telemetry telemetry, ElapsedTime elapsedTime) {
-        this.hardware = new MecanumHardwareMap(hwMap);
-        this.alliance = alliance;
-        this.telemetry = telemetry;
+    public AutonomousRobot(HardwareMap hwMap, Alliance alliance, LinearOpMode opmode, ElapsedTime elapsedTime) {
+        this(hwMap, alliance, opmode);
         this.elapsedTime = elapsedTime;
-        this.locationInfo = new LocationInfo();
     }
 
     /**
@@ -251,8 +251,8 @@ public class AutonomousRobot {
         if (PHONE_IS_PORTRAIT) {
             phoneXRotate = 90 ;
         }
-        final float CAMERA_FORWARD_DISPLACEMENT  = -9f * mmPerInch;   // eg: Camera is 0 Inches in front of robot center
-        final float CAMERA_VERTICAL_DISPLACEMENT = 9.5f * mmPerInch;   // eg: Camera is 6.625 Inches above ground
+        final float CAMERA_FORWARD_DISPLACEMENT  = -10f * mmPerInch;   // eg: Camera is 0 Inches in front of robot center
+        final float CAMERA_VERTICAL_DISPLACEMENT = 9.75f * mmPerInch;   // eg: Camera is 6.625 Inches above ground
         final float CAMERA_LEFT_DISPLACEMENT     = 0f * mmPerInch;     // eg: Camera is ON the robot's center line
 
         OpenGLMatrix robotFromCamera = OpenGLMatrix
@@ -265,6 +265,14 @@ public class AutonomousRobot {
         }
 
         visibleTrackables = new ArrayList<>();
+    }
+
+    public LinearOpMode getOpmode() {
+        return opmode;
+    }
+
+    public boolean isOpmodeActive() {
+        return opmode.opModeIsActive() && !opmode.isStopRequested();
     }
 
     /**
@@ -305,7 +313,7 @@ public class AutonomousRobot {
      */
     public void wait(double waitTime) {
         double initialTime = System.currentTimeMillis();
-        while (System.currentTimeMillis() < initialTime + (waitTime * 1000)) {}
+        while (System.currentTimeMillis() < initialTime + (waitTime * 1000));
     }
 
     /**
@@ -408,16 +416,18 @@ public class AutonomousRobot {
     /**
      * Turns the robot by an angle.
      * This blocks the current thread.
-     * @param angle angle to turn to
-     * @param velocity rotation speed (between 0 and 1)
+     * @param angle angle to turn to in degrees
      */
-    public void turn(double angle, double velocity) {
-        double initialOrientation = this.getOrientation2DIMU();
-        double[] rotationValues = hardware.drivetrain.getWheelRotationValues(velocity);
+    public void turn(double angle) {
+        telemetry.addData("TURN EXECUTING", "Angle: %.2f degrees", angle);
+        telemetry.update();
 
-        while (this.getOrientation2DIMU() - initialOrientation < angle) {
-            hardware.drivetrain.setMotorPowers(rotationValues[0], rotationValues[1], rotationValues[2], rotationValues[3]);
+        hardware.drivetrain.setVelocity(0.1);
+        hardware.drivetrain.setTargetHeading(Math.toRadians(angle));
+        while (isOpmodeActive() && hardware.drivetrain.isRotating()) {
+            hardware.drivetrain.updateHeading();
         }
+        hardware.drivetrain.finishRotating();
     }
 
     /**
@@ -547,7 +557,9 @@ public class AutonomousRobot {
         hardware.drivetrain.setRotation(rotation);
         hardware.drivetrain.setVelocity(velocity);
         hardware.drivetrain.setTargetPosition(distance * hardware.motorTicksPerInch);
-        hardware.drivetrain.position();
+        while (isOpmodeActive() && hardware.drivetrain.isPositioning(telemetry)) hardware.drivetrain.updatePosition();
+        telemetry.update();
+        hardware.drivetrain.finishPositioning();
     }
 
     /**
@@ -576,16 +588,16 @@ public class AutonomousRobot {
         if (orientationInfo != null) {
             double initialOrientation = this.getOrientation2DIMU();
 
-            while (hardware.drivetrain.isPositioning()) {
+            while (isOpmodeActive() && hardware.drivetrain.isPositioning()) {
                 if (this.getOrientation2DIMU() - initialOrientation < orientationInfo.angle)
                     hardware.drivetrain.setRotation(orientationInfo.rotation);
             }
 
             // In case the robot did not finish turning by the time it reached its destination
             if (this.getOrientation2D() - initialOrientation < orientationInfo.angle)
-                this.turn(orientationInfo.angle - (this.getOrientation2D() - initialOrientation), orientationInfo.rotation);
+                this.turn(orientationInfo.angle - (this.getOrientation2D() - initialOrientation));
         } else {
-            while (hardware.drivetrain.isPositioning()) {
+            while (isOpmodeActive() && hardware.drivetrain.isPositioning()) {
                 Velocity gyroVelocity = hardware.imu.getVelocity();
                 xVelocities.add(gyroVelocity.xVeloc);
                 yVelocities.add(gyroVelocity.yVeloc);

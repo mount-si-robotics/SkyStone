@@ -34,26 +34,9 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.robotlib.state.Alliance;
 
-@Autonomous(name="Experimental Mecanum AUTO BLUE (12069)", group="Autonomous")
-public class BlueMecanumAutonomous extends LinearOpMode {
-    private BasicMecanumAutonomous mecanumAutonomous;
-
-    @Override
-    public void runOpMode() {
-        // Initialize robot
-        mecanumAutonomous = new BasicMecanumAutonomous(this.hardwareMap, this.telemetry, Alliance.BLUE);
-        mecanumAutonomous.init();
-
-        // Wait for driver to press start
-        waitForStart();
-        mecanumAutonomous.start();
-
-        // Game Loop
-        while (!isStopRequested()) {
-            boolean keepLooping = mecanumAutonomous.loop();
-            if (!keepLooping) break;
-        }
-
-        mecanumAutonomous.end();
+@Autonomous(name="Experimental Skystone Deliver Red", group="Autonomous")
+public class SkystoneDeliverRedAutonomous extends SkystoneDeliverAutonomous {
+    {
+        alliance = Alliance.RED;
     }
 }
