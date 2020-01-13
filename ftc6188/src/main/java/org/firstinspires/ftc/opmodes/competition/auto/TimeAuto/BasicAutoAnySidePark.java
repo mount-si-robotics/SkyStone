@@ -1,30 +1,17 @@
-package org.firstinspires.ftc.opmodes.competition.auto.ParkAuto;
+package org.firstinspires.ftc.opmodes.competition.auto.TimeAuto;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-import org.firstinspires.ftc.robotlib.robot.SiBorgsMecanumRobot;
+import org.firstinspires.ftc.robotlib.auto.SiBorgsMecanumTimeAuto;
 import org.firstinspires.ftc.robotlib.state.AutoDirection;
 import org.firstinspires.ftc.robotlib.state.Button;
-import org.firstinspires.ftc.robotlib.state.ServoState;
 
 @Disabled
-@Autonomous(name="Auto Park ALL", group="AutoComp")
-public class SiBorgsMecanumAutoPark extends LinearOpMode
+@Autonomous(name="Any Side | Bridge Park", group="CompAuto")
+public class BasicAutoAnySidePark extends SiBorgsMecanumTimeAuto
 {
-    // Robot
-    private SiBorgsMecanumRobot robot;
-
-    // Fields
-    private final double VELOCITY = 0.5;
-
-    // Buttons
-    // Attaching capstone buttons
-    private Button capstoneOpen;
-    private Button capstoneClose;
-
-    // Designating parking path buttons
+    // Pathing buttons
     private Button moveForward;
     private Button moveRearward;
     private Button moveLeft;
@@ -32,74 +19,51 @@ public class SiBorgsMecanumAutoPark extends LinearOpMode
 
     // AutoProgram
     private AutoProgram autoPath;
-    private AutoDirection autoSideDirection;
 
     @Override
-    public void runOpMode() throws InterruptedException
+    public void runOpMode()
     {
-        /** INIT **/
-        robot = new SiBorgsMecanumRobot(this.hardwareMap, this.telemetry);
-
-        // Button init
-        capstoneOpen = new Button();
-        capstoneClose = new Button();
         moveForward = new Button();
         moveRearward = new Button();
-        moveLeft = new Button();
         moveRight = new Button();
+        moveLeft = new Button();
 
-        autoPath = AutoProgram.FORWARD;
-        autoSideDirection = AutoDirection.RIGHT;
-
-        /** Adjustments before the auto program starts **/
+        init("Bridge Park");
         while (!isStarted())
         {
-            /** LOADING CAPSTONE **/
-            capstoneOpen.input(gamepad1.y || gamepad2.y);
-            capstoneClose.input(gamepad1.a || gamepad2.a);
-
-            if (capstoneOpen.onPress()) { robot.armGripSlide.setPosition(ServoState.UP); }
-            else if (capstoneClose.onPress()) { robot.armGripSlide.setPosition(ServoState.DOWN); }
-
-            robot.armCrane.setVerticalPower(-gamepad1.left_stick_y);
-            robot.armCrane.setHorizontalPower(gamepad1.right_stick_y);
-
-            telemetry.addData("ADD CAPSTONE TO SERVO (G1-DPAD) + (G1-LStick)", robot.armGripSlide.getState());
-
-            /** PROGRAMING AUTO **/
-            moveForward.input(gamepad1.dpad_up);
-            moveRearward.input(gamepad1.dpad_down);
-            moveLeft.input(gamepad1.dpad_left);
-            moveRight.input(gamepad1.dpad_right);
             updateProgramPlan();
-
-            telemetry.addData("PROGRAM AUTO", autoPath);
+            initLoop();
             displayProgramPlan();
-
-            telemetry.update();
-            telemetry.clearAll();
         }
-        /** AUTO PROGRAM STARTS WITH POS INITS AND VARIABLE DECLARATIONS**/
-        telemetry.addData("RUNNING AUTO PATH", autoPath);
-        telemetry.update();
 
-        // define the auto path
-        if (autoPath == AutoProgram.RIGHT || autoPath == AutoProgram.FRONTRIGHT)
-        { autoSideDirection = AutoDirection.RIGHT; }
-        else
-        { autoSideDirection = AutoDirection.LEFT; }
+        switch(autoPath)
+        {
+            case FRONTRIGHT:
+            {
+                super.position(AutoDirection.FRONT, 1);
+                super.position(AutoDirection.RIGHT, 1);
+                break;
+            }
 
-        /** AUTO PROGRAM STARTS DRIVING **/
-        // drive the forward component of the auto path
-        if (autoPath == AutoProgram.FRONTRIGHT || autoPath == AutoProgram.FRONTLEFT)
-        { robot.drivetrain.autoPositionByEncoder(AutoDirection.FRONT, AutoParkConstants.PARK_FRONT_DIST_IN, VELOCITY); }
-        else
-        { robot.drivetrain.autoPositionByEncoder(AutoDirection.FRONT, 1, VELOCITY); }
-        // drive the side component of the auto path
-        robot.drivetrain.autoPositionByEncoder(autoSideDirection, AutoParkConstants.PARK_SIDE_DIST_IN, VELOCITY);
+            case FRONTLEFT:
+            {
+                super.position(AutoDirection.FRONT, 1);
+                super.position(AutoDirection.LEFT, 1);
+                break;
+            }
 
-        sleep(1000);
-        requestOpModeStop();
+            case LEFT:
+            {
+                super.position(AutoDirection.LEFT, 1);
+                break;
+            }
+
+            case RIGHT:
+            {
+                super.position(AutoDirection.RIGHT, 1);
+                break;
+            }
+        }
     }
 
     private void displayProgramPlan()
@@ -219,10 +183,4 @@ enum AutoProgram
     FORWARD(),
     LEFT(),
     RIGHT()
-}
-
-class AutoParkConstants
-{
-    static final double PARK_FRONT_DIST_IN = 28;
-    static final double PARK_SIDE_DIST_IN = 12;
 }

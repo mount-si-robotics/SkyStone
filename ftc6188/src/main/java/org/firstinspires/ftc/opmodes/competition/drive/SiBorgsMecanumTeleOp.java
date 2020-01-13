@@ -10,7 +10,7 @@ import org.firstinspires.ftc.robotlib.state.Button;
 import org.firstinspires.ftc.robotlib.state.ServoState;
 import org.firstinspires.ftc.robotlib.state.ToggleBoolean;
 
-@TeleOp(name="Mecanum TeleOp V-CompetitionReady", group="TeleComp")
+@TeleOp(name="Mecanum TeleOp V-Comp", group="TeleComp")
 public class SiBorgsMecanumTeleOp extends OpMode
 {
     // TeleOp specific variables
@@ -91,7 +91,8 @@ public class SiBorgsMecanumTeleOp extends OpMode
         // Drivetrain updates
         robot.drivetrain.setCourse(course);
         robot.drivetrain.setVelocity(velocity * (driverTwoBrakes.output() ? 0 : 1));
-        robot.drivetrain.setRotation((-gamepad1.left_stick_x * (3.0/4.0)) * (driverTwoBrakes.output() ? 0.5 : 1));
+        robot.drivetrain.setRotation((-gamepad1.left_stick_x * (3.0/4.0))
+                * (driverTwoBrakes.output() ? 0.5 : 1));
 
 
         /** DRIVER TWO **/

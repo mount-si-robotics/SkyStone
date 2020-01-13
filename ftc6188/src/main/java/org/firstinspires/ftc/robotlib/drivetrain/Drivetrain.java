@@ -9,7 +9,7 @@ abstract public class Drivetrain
 {
     // Movement variables
     protected double velocity = 0;
-    private double lowPowerMultiplier = 0.3;
+    private double lowPowerMultiplier = 0.4;
 
     // Toggles the half power drive mode for precision control
     private ToggleBoolean lowPower;

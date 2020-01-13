@@ -1,10 +1,12 @@
 package org.firstinspires.ftc.opmodes.tests;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.robotlib.robot.SiBorgsMecanumIMURobot;
 
+@Disabled
 @Autonomous(name="Auto Rotation Test", group="Test")
 public class AutoRotationTest extends LinearOpMode
 {
