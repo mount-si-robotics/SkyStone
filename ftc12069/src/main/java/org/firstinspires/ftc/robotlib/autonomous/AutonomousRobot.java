@@ -557,7 +557,7 @@ public class AutonomousRobot {
         hardware.drivetrain.setRotation(rotation);
         hardware.drivetrain.setVelocity(velocity);
         hardware.drivetrain.setTargetPosition(distance * hardware.motorTicksPerInch);
-        while (isOpmodeActive() && hardware.drivetrain.isPositioning(telemetry)) hardware.drivetrain.updatePosition();
+        while (isOpmodeActive() && hardware.drivetrain.isPositioning()) hardware.drivetrain.updatePosition();
         telemetry.update();
         hardware.drivetrain.finishPositioning();
     }

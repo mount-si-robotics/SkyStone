@@ -36,14 +36,11 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.robotlib.autonomous.AutonomousRobot;
-import org.firstinspires.ftc.robotlib.autonomous.HeadingManager;
-import org.firstinspires.ftc.robotlib.navigation.Point3D;
-import org.firstinspires.ftc.robotlib.robot.HeadingableMecanumHardwareMap;
 import org.firstinspires.ftc.robotlib.autonomous.HeadingableAutonomousRobot;
+import org.firstinspires.ftc.robotlib.navigation.Point3D;
 import org.firstinspires.ftc.robotlib.state.Alliance;
 @Autonomous(name = "Calibrate", group = "auto")
 public class Calibrate extends LinearOpMode {
@@ -140,15 +137,15 @@ public class Calibrate extends LinearOpMode {
 
 class CalibrateVuforia {
     private Alliance alliance;
-    private Telemetry telemetry;
+    private LinearOpMode opmode;
     private HardwareMap hardwareMap;
     private ElapsedTime elapsedTime = new ElapsedTime();
 
     private AutonomousRobot robot;
 
-    CalibrateVuforia(HardwareMap hardwareMap, Telemetry telemetry, Alliance alliance) {
+    CalibrateVuforia(HardwareMap hardwareMap, LinearOpMode opmode, Alliance alliance) {
         this.hardwareMap = hardwareMap;
-        this.telemetry = telemetry;
+        this.opmode = opmode;
         this.alliance = alliance;
     }
 
@@ -158,7 +155,7 @@ class CalibrateVuforia {
     void init() {
         // Initialize robot
         telemetry.addData("Status", "Initialized");
-        robot = new AutonomousRobot(this.hardwareMap, alliance, telemetry);
+        robot = new AutonomousRobot(this.hardwareMap, alliance, opmode);
         robot.init();
     }
 
