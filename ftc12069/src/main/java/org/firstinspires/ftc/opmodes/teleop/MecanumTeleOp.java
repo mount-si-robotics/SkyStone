@@ -23,6 +23,7 @@ public class MecanumTeleOp extends OpMode
 
     // TeleOp States
     private boolean rightMotion = true;
+    private boolean lowPowerMode = false;
 
     // Buttons
     private Button leftBumper;
@@ -31,6 +32,7 @@ public class MecanumTeleOp extends OpMode
     private Button rightStickButton;
     private Button yButton;
     private Button xButton;
+    private Button bButton;
 
     @Override
     public void init()
@@ -44,6 +46,7 @@ public class MecanumTeleOp extends OpMode
         rightStickButton = new Button();
         yButton = new Button();
         xButton = new Button();
+        bButton = new Button();
 
         hardware.deliveryLeft.reset();
         hardware.deliveryRight.reset();
@@ -81,8 +84,8 @@ public class MecanumTeleOp extends OpMode
         }
 
         hardware.drivetrain.setCourse(course);
-        hardware.drivetrain.setVelocity(velocity, true);
-        hardware.drivetrain.setRotation(rotation);
+        hardware.drivetrain.setVelocity(lowPowerMode ? velocity * 0.5 : velocity, true);
+        hardware.drivetrain.setRotation(lowPowerMode ? rotation * 0.5 : rotation);
 
         // Intake
         if (rightTrigger.isToggled()) {
@@ -103,12 +106,15 @@ public class MecanumTeleOp extends OpMode
             }
         }
 
+        if (bButton.isReleased()) lowPowerMode = !lowPowerMode;
+
         //if (gamepad1.a) rightMotion = false;
         //if (gamepad1.b) rightMotion = true;
 
         rightTrigger.input(gamepad1.right_trigger > 0);
         rightStickButton.input(gamepad1.right_stick_button);
         xButton.input(gamepad1.x);
+        bButton.input(gamepad1.b);
 
         // GAMEPAD 2
         if (leftBumper.isReleased()) {
