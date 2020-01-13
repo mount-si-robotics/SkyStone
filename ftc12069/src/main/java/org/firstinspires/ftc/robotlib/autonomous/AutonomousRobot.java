@@ -119,152 +119,158 @@ public class AutonomousRobot {
     }
 
     /**
-     * Initializes the robot (specifically Vuforia).
+     * Initializes the robot.
      */
+    public void init(boolean initVuforia) {
+        if (initVuforia) {
+            /* Configure Vuforia by creating a Parameter object, and passing it to the Vuforia engine.
+             * We can pass Vuforia the handle to a camera preview resource (on the RC phone);
+             * If no camera monitor is desired, use the parameter-less constructor instead (commented out below).
+             */
+            int cameraMonitorViewId = hardware.internalHardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardware.internalHardwareMap.appContext.getPackageName());
+            VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
+            //parameters.cameraName = hardware.webcamName;
+            // VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
+
+            parameters.vuforiaLicenseKey = Constants.VUFORIA_KEY;
+            parameters.cameraDirection = CAMERA_CHOICE;
+
+            // Instantiate the Vuforia engine
+            vuforia = ClassFactory.getInstance().createVuforia(parameters);
+
+            // Load the data sets for the trackable objects. These particular data
+            // sets are stored in the 'assets' part of our application.
+            trackables = this.vuforia.loadTrackablesFromAsset("Skystone");
+
+            VuforiaTrackable stoneTarget = trackables.get(0);
+            stoneTarget.setName("Stone Target");
+            VuforiaTrackable blueRearBridge = trackables.get(1);
+            blueRearBridge.setName("Blue Rear Bridge");
+            VuforiaTrackable redRearBridge = trackables.get(2);
+            redRearBridge.setName("Red Rear Bridge");
+            VuforiaTrackable redFrontBridge = trackables.get(3);
+            redFrontBridge.setName("Red Front Bridge");
+            VuforiaTrackable blueFrontBridge = trackables.get(4);
+            blueFrontBridge.setName("Blue Front Bridge");
+            VuforiaTrackable red1 = trackables.get(5);
+            red1.setName("Red Perimeter 1");
+            VuforiaTrackable red2 = trackables.get(6);
+            red2.setName("Red Perimeter 2");
+            VuforiaTrackable front1 = trackables.get(7);
+            front1.setName("Front Perimeter 1");
+            VuforiaTrackable front2 = trackables.get(8);
+            front2.setName("Front Perimeter 2");
+            VuforiaTrackable blue1 = trackables.get(9);
+            blue1.setName("Blue Perimeter 1");
+            VuforiaTrackable blue2 = trackables.get(10);
+            blue2.setName("Blue Perimeter 2");
+            VuforiaTrackable rear1 = trackables.get(11);
+            rear1.setName("Rear Perimeter 1");
+            VuforiaTrackable rear2 = trackables.get(12);
+            rear2.setName("Rear Perimeter 2");
+
+            // For convenience, gather together all the trackable objects in one easily-iterable collection */
+            trackablesList = new ArrayList<>(trackables);
+            // Set the position of the Stone Target.  Since it's not fixed in position, assume it's at the field origin.
+            // Rotated it to face forward, and raised it to sit on the ground correctly.
+            // This can be used for generic target-centric approach algorithms
+            stoneTarget.setLocation(OpenGLMatrix
+                    .translation(0, 0, stoneZ)
+                    .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90, 0, -90)));
+
+            //Set the position of the bridge support targets with relation to origin (center of field)
+            blueFrontBridge.setLocation(OpenGLMatrix
+                    .translation(-bridgeX, bridgeY, bridgeZ)
+                    .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 0, bridgeRotY, bridgeRotZ)));
+
+            blueRearBridge.setLocation(OpenGLMatrix
+                    .translation(-bridgeX, bridgeY, bridgeZ)
+                    .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 0, -bridgeRotY, bridgeRotZ)));
+
+            redFrontBridge.setLocation(OpenGLMatrix
+                    .translation(-bridgeX, -bridgeY, bridgeZ)
+                    .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 0, -bridgeRotY, 0)));
+
+            redRearBridge.setLocation(OpenGLMatrix
+                    .translation(bridgeX, -bridgeY, bridgeZ)
+                    .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 0, bridgeRotY, 0)));
+
+            //Set the position of the perimeter targets with relation to origin (center of field)
+            red1.setLocation(OpenGLMatrix
+                    .translation(quadField, -halfField, mmTargetHeight)
+                    .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90, 0, 180)));
+
+            red2.setLocation(OpenGLMatrix
+                    .translation(-quadField, -halfField, mmTargetHeight)
+                    .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90, 0, 180)));
+
+            front1.setLocation(OpenGLMatrix
+                    .translation(-halfField, -quadField, mmTargetHeight)
+                    .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90, 0, 90)));
+
+            front2.setLocation(OpenGLMatrix
+                    .translation(-halfField, quadField, mmTargetHeight)
+                    .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90, 0, 90)));
+
+            blue1.setLocation(OpenGLMatrix
+                    .translation(-quadField, halfField, mmTargetHeight)
+                    .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90, 0, 0)));
+
+            blue2.setLocation(OpenGLMatrix
+                    .translation(quadField, halfField, mmTargetHeight)
+                    .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90, 0, 0)));
+
+            rear1.setLocation(OpenGLMatrix
+                    .translation(halfField, quadField, mmTargetHeight)
+                    .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90, 0, -90)));
+
+            rear2.setLocation(OpenGLMatrix
+                    .translation(halfField, -quadField, mmTargetHeight)
+                    .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90, 0, -90)));
+            //
+            // Create a transformation matrix describing where the phone is on the robot.
+            //
+            // NOTE !!!!  It's very important that you turn OFF your phone's Auto-Screen-Rotation option.
+            // Lock it into Portrait for these numbers to work.
+            //
+            // Info:  The coordinate frame for the robot looks the same as the field.
+            // The robot's "forward" direction is facing out along X axis, with the LEFT side facing out along the Y axis.
+            // Z is UP on the robot.  This equates to a bearing angle of Zero degrees.
+            //
+            // The phone starts out lying flat, with the screen facing Up and with the physical top of the phone
+            // pointing to the LEFT side of the Robot.
+            // The two examples below assume that the camera is facing forward out the front of the robot.
+
+            // We need to rotate the camera around it's long axis to bring the correct camera forward.
+            if (CAMERA_CHOICE == BACK) {
+                phoneYRotate = -90;
+            } else {
+                phoneYRotate = 90;
+            }
+
+            // Rotate the phone vertical about the X axis if it's in portrait mode
+            if (PHONE_IS_PORTRAIT) {
+                phoneXRotate = 90;
+            }
+            final float CAMERA_FORWARD_DISPLACEMENT = -10f * mmPerInch;   // eg: Camera is 0 Inches in front of robot center
+            final float CAMERA_VERTICAL_DISPLACEMENT = 9.75f * mmPerInch;   // eg: Camera is 6.625 Inches above ground
+            final float CAMERA_LEFT_DISPLACEMENT = 0f * mmPerInch;     // eg: Camera is ON the robot's center line
+
+            OpenGLMatrix robotFromCamera = OpenGLMatrix
+                    .translation(CAMERA_FORWARD_DISPLACEMENT, CAMERA_LEFT_DISPLACEMENT, CAMERA_VERTICAL_DISPLACEMENT)
+                    .multiplied(Orientation.getRotationMatrix(EXTRINSIC, YZX, DEGREES, phoneYRotate, phoneZRotate, phoneXRotate));
+
+            // Let all the trackable listeners know where the phone is.
+            for (VuforiaTrackable trackable : trackablesList) {
+                ((VuforiaTrackableDefaultListener) trackable.getListener()).setPhoneInformation(robotFromCamera, parameters.cameraDirection);
+            }
+
+            visibleTrackables = new ArrayList<>();
+        }
+    }
+
     public void init() {
-        /* Configure Vuforia by creating a Parameter object, and passing it to the Vuforia engine.
-         * We can pass Vuforia the handle to a camera preview resource (on the RC phone);
-         * If no camera monitor is desired, use the parameter-less constructor instead (commented out below).
-         */
-        int cameraMonitorViewId = hardware.internalHardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardware.internalHardwareMap.appContext.getPackageName());
-        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
-        //parameters.cameraName = hardware.webcamName;
-        // VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
-
-        parameters.vuforiaLicenseKey = Constants.VUFORIA_KEY;
-        parameters.cameraDirection = CAMERA_CHOICE;
-
-        // Instantiate the Vuforia engine
-        vuforia = ClassFactory.getInstance().createVuforia(parameters);
-
-        // Load the data sets for the trackable objects. These particular data
-        // sets are stored in the 'assets' part of our application.
-        trackables = this.vuforia.loadTrackablesFromAsset("Skystone");
-
-        VuforiaTrackable stoneTarget = trackables.get(0);
-        stoneTarget.setName("Stone Target");
-        VuforiaTrackable blueRearBridge = trackables.get(1);
-        blueRearBridge.setName("Blue Rear Bridge");
-        VuforiaTrackable redRearBridge = trackables.get(2);
-        redRearBridge.setName("Red Rear Bridge");
-        VuforiaTrackable redFrontBridge = trackables.get(3);
-        redFrontBridge.setName("Red Front Bridge");
-        VuforiaTrackable blueFrontBridge = trackables.get(4);
-        blueFrontBridge.setName("Blue Front Bridge");
-        VuforiaTrackable red1 = trackables.get(5);
-        red1.setName("Red Perimeter 1");
-        VuforiaTrackable red2 = trackables.get(6);
-        red2.setName("Red Perimeter 2");
-        VuforiaTrackable front1 = trackables.get(7);
-        front1.setName("Front Perimeter 1");
-        VuforiaTrackable front2 = trackables.get(8);
-        front2.setName("Front Perimeter 2");
-        VuforiaTrackable blue1 = trackables.get(9);
-        blue1.setName("Blue Perimeter 1");
-        VuforiaTrackable blue2 = trackables.get(10);
-        blue2.setName("Blue Perimeter 2");
-        VuforiaTrackable rear1 = trackables.get(11);
-        rear1.setName("Rear Perimeter 1");
-        VuforiaTrackable rear2 = trackables.get(12);
-        rear2.setName("Rear Perimeter 2");
-
-        // For convenience, gather together all the trackable objects in one easily-iterable collection */
-        trackablesList = new ArrayList<>(trackables);
-        // Set the position of the Stone Target.  Since it's not fixed in position, assume it's at the field origin.
-        // Rotated it to face forward, and raised it to sit on the ground correctly.
-        // This can be used for generic target-centric approach algorithms
-        stoneTarget.setLocation(OpenGLMatrix
-                .translation(0, 0, stoneZ)
-                .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90, 0, -90)));
-
-        //Set the position of the bridge support targets with relation to origin (center of field)
-        blueFrontBridge.setLocation(OpenGLMatrix
-                .translation(-bridgeX, bridgeY, bridgeZ)
-                .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 0, bridgeRotY, bridgeRotZ)));
-
-        blueRearBridge.setLocation(OpenGLMatrix
-                .translation(-bridgeX, bridgeY, bridgeZ)
-                .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 0, -bridgeRotY, bridgeRotZ)));
-
-        redFrontBridge.setLocation(OpenGLMatrix
-                .translation(-bridgeX, -bridgeY, bridgeZ)
-                .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 0, -bridgeRotY, 0)));
-
-        redRearBridge.setLocation(OpenGLMatrix
-                .translation(bridgeX, -bridgeY, bridgeZ)
-                .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 0, bridgeRotY, 0)));
-
-        //Set the position of the perimeter targets with relation to origin (center of field)
-        red1.setLocation(OpenGLMatrix
-                .translation(quadField, -halfField, mmTargetHeight)
-                .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90, 0, 180)));
-
-        red2.setLocation(OpenGLMatrix
-                .translation(-quadField, -halfField, mmTargetHeight)
-                .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90, 0, 180)));
-
-        front1.setLocation(OpenGLMatrix
-                .translation(-halfField, -quadField, mmTargetHeight)
-                .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90, 0 , 90)));
-
-        front2.setLocation(OpenGLMatrix
-                .translation(-halfField, quadField, mmTargetHeight)
-                .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90, 0, 90)));
-
-        blue1.setLocation(OpenGLMatrix
-                .translation(-quadField, halfField, mmTargetHeight)
-                .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90, 0, 0)));
-
-        blue2.setLocation(OpenGLMatrix
-                .translation(quadField, halfField, mmTargetHeight)
-                .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90, 0, 0)));
-
-        rear1.setLocation(OpenGLMatrix
-                .translation(halfField, quadField, mmTargetHeight)
-                .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90, 0 , -90)));
-
-        rear2.setLocation(OpenGLMatrix
-                .translation(halfField, -quadField, mmTargetHeight)
-                .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90, 0, -90)));
-        //
-        // Create a transformation matrix describing where the phone is on the robot.
-        //
-        // NOTE !!!!  It's very important that you turn OFF your phone's Auto-Screen-Rotation option.
-        // Lock it into Portrait for these numbers to work.
-        //
-        // Info:  The coordinate frame for the robot looks the same as the field.
-        // The robot's "forward" direction is facing out along X axis, with the LEFT side facing out along the Y axis.
-        // Z is UP on the robot.  This equates to a bearing angle of Zero degrees.
-        //
-        // The phone starts out lying flat, with the screen facing Up and with the physical top of the phone
-        // pointing to the LEFT side of the Robot.
-        // The two examples below assume that the camera is facing forward out the front of the robot.
-
-        // We need to rotate the camera around it's long axis to bring the correct camera forward.
-        if (CAMERA_CHOICE == BACK) {
-            phoneYRotate = -90;
-        } else {
-            phoneYRotate = 90;
-        }
-
-        // Rotate the phone vertical about the X axis if it's in portrait mode
-        if (PHONE_IS_PORTRAIT) {
-            phoneXRotate = 90 ;
-        }
-        final float CAMERA_FORWARD_DISPLACEMENT  = -10f * mmPerInch;   // eg: Camera is 0 Inches in front of robot center
-        final float CAMERA_VERTICAL_DISPLACEMENT = 9.75f * mmPerInch;   // eg: Camera is 6.625 Inches above ground
-        final float CAMERA_LEFT_DISPLACEMENT     = 0f * mmPerInch;     // eg: Camera is ON the robot's center line
-
-        OpenGLMatrix robotFromCamera = OpenGLMatrix
-                .translation(CAMERA_FORWARD_DISPLACEMENT, CAMERA_LEFT_DISPLACEMENT, CAMERA_VERTICAL_DISPLACEMENT)
-                .multiplied(Orientation.getRotationMatrix(EXTRINSIC, YZX, DEGREES, phoneYRotate, phoneZRotate, phoneXRotate));
-
-        // Let all the trackable listeners know where the phone is.
-        for (VuforiaTrackable trackable : trackablesList) {
-            ((VuforiaTrackableDefaultListener) trackable.getListener()).setPhoneInformation(robotFromCamera, parameters.cameraDirection);
-        }
-
-        visibleTrackables = new ArrayList<>();
+        init(true);
     }
 
     public LinearOpMode getOpmode() {
